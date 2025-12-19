@@ -17,7 +17,7 @@ interface UsageLog {
   date: string;
   created_at?: string;
   user_id: string;
-  users?: { full_name: string }; 
+  users?: { full_name: string };
   usage_data: any;
 }
 
@@ -34,7 +34,7 @@ const UsageViewPopup = ({
   unitId,
   onClose,
 }: UsageViewPopupProps) => {
-  
+
   const [paramedicName, setParamedicName] = useState<string>("Cargando...");
 
   // ===========================================================================
@@ -43,7 +43,7 @@ const UsageViewPopup = ({
   useEffect(() => {
     const fetchParamedicName = async () => {
       if (!usageLog) return;
-      
+
       // 1. Si ya viene por el JOIN inicial (lo más rápido)
       if (usageLog.users?.full_name) {
         setParamedicName(usageLog.users.full_name);
@@ -52,12 +52,12 @@ const UsageViewPopup = ({
 
       if (usageLog.user_id) {
         setParamedicName("Consultando...");
-        
+
         try {
           // CONSULTA EXACTA PARA TU ESTRUCTURA DE DATOS
           // Solo pedimos 'full_name' y 'username' porque 'first_name' no existe
           const { data, error } = await supabase
-            .from('users') 
+            .from('users')
             .select('full_name, username, email')
             .eq('id', usageLog.user_id)
             .maybeSingle();
@@ -96,45 +96,51 @@ const UsageViewPopup = ({
     usageLog?.created_at
       ? new Date(usageLog.created_at).toLocaleString("es-ES")
       : usageLog?.date
-      ? new Date(usageLog.date ?? new Date()).toLocaleDateString("es-ES")
-      : "";
+        ? new Date(usageLog.date ?? new Date()).toLocaleDateString("es-ES")
+        : "";
 
   // --- Procesar JSON de Gastos ---
   const getUsageItems = () => {
     if (!usageLog?.usage_data) return [];
-    
+
     let data = usageLog.usage_data;
+
     if (typeof data === 'string') {
-      try { data = JSON.parse(data); } catch (e) { return []; }
+      try {
+        data = JSON.parse(data);
+      } catch (e) {
+        return [];
+      }
     }
-    
-    if (Array.isArray(data)) return data;
-    if (data.item_name || data.name) return [data];
-    return Object.keys(data).map(key => data[key]);
+
+    return Object.entries(data).map(([key, value]) => ({
+      nombre: key,
+      cantidad: Number(value)
+    }));
   };
-  
+
   const items = getUsageItems();
 
   // --- PDF ---
   const downloadAsPDF = () => {
     if (!usageLog) return;
     const doc = new jsPDF();
-    
+
     doc.setTextColor(220, 53, 69); // Rojo
     doc.setFontSize(16); doc.setFont("helvetica", "bold");
     doc.text(`Reporte de Gastos / Consumo`, 10, 15);
-    
+
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(12); doc.setFont("helvetica", "normal");
     doc.text(`Ambulancia: ${unitId || "N/A"}`, 10, 25);
     doc.text(`Fecha: ${dateLabel}`, 10, 32);
-    
+
     // Nombre corregido
-    doc.text(`Registrado por: ${paramedicName}`, 10, 39); 
-    
+    doc.text(`Registrado por: ${paramedicName}`, 10, 39);
+
     doc.text(`ID Ref: ${usageLog.id.slice(0, 8)}...`, 10, 46);
-    
-    doc.setDrawColor(200); doc.line(10, 50, 200, 50); 
+
+    doc.setDrawColor(200); doc.line(10, 50, 200, 50);
 
     let yPosition = 60;
     doc.setFont("helvetica", "bold");
@@ -143,13 +149,13 @@ const UsageViewPopup = ({
     yPosition += 8;
     doc.setFont("helvetica", "normal");
 
-    items.forEach((item: any) => {
-      const nombre = item.item_name || item.name || "Sin nombre";
-      const cantidad = item.quantity_used || item.quantity || 0;
-      
+    items.forEach((item) => {
+      const nombre = item.nombre; // Cambiado a nombre
+      const cantidad = item.cantidad; // Cambiado a cantidad
+
       if (yPosition > 270) { doc.addPage(); yPosition = 20; }
       doc.text(`${nombre}`, 10, yPosition);
-      doc.text(`${cantidad}`, 150, yPosition);
+      doc.text(`-${cantidad}`, 150, yPosition);
       yPosition += 8;
     });
 
@@ -166,16 +172,18 @@ const UsageViewPopup = ({
           </tr>
         </thead>
         <tbody>
-          {items.map((item: any, index: number) => {
-             const nombre = item.item_name || item.name || "Sin nombre";
-             const cantidad = item.quantity_used || item.quantity || 0;
-             return (
-              <tr key={index} className="hover:bg-orange-50/30">
-                <td className="px-4 py-2 border-b text-gray-800">{nombre}</td>
-                <td className="px-4 py-2 border-b text-gray-800 font-bold text-red-600">-{cantidad}</td>
-              </tr>
-            );
-          })}
+          {items.map((item, index) => (
+            <tr key={index} className="hover:bg-orange-50/30">
+              <td className="px-4 py-2 border-b text-gray-800 capitalize">
+                {/* Antes decía item.name, ahora debe ser item.nombre */}
+                {item.nombre}
+              </td>
+              <td className="px-4 py-2 border-b text-right font-bold text-red-600">
+                {/* Antes decía item.amount, ahora debe ser item.cantidad */}
+                -{item.cantidad}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
@@ -186,26 +194,26 @@ const UsageViewPopup = ({
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-xl flex items-center gap-2 text-orange-700">
-            <TrendingDown className="h-6 w-6"/>
+            <TrendingDown className="h-6 w-6" />
             Detalle de Gasto
           </DialogTitle>
           <DialogDescription asChild>
             <div className="flex flex-col gap-1 mt-2 text-sm text-gray-600 bg-orange-50 p-3 rounded-md border border-orange-100">
-               <div className="flex justify-between">
-                 <span className="font-semibold text-gray-900">Ambulancia:</span> 
-                 <span>{unitId}</span>
-               </div>
-               <div className="flex justify-between">
-                 <span className="font-semibold text-gray-900">Fecha:</span> 
-                 <span>{dateLabel}</span>
-               </div>
-               <div className="flex justify-between items-center">
-                 <span className="font-semibold text-gray-900">Registrado por:</span> 
-                 <span className="font-bold text-orange-700 flex items-center gap-2">
-                   {paramedicName === "Consultando..." && <Loader2 className="h-3 w-3 animate-spin"/>}
-                   {paramedicName}
-                 </span>
-               </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-900">Ambulancia:</span>
+                <span>{unitId}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="font-semibold text-gray-900">Fecha:</span>
+                <span>{dateLabel}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-gray-900">Registrado por:</span>
+                <span className="font-bold text-orange-700 flex items-center gap-2">
+                  {paramedicName === "Consultando..." && <Loader2 className="h-3 w-3 animate-spin" />}
+                  {paramedicName}
+                </span>
+              </div>
             </div>
           </DialogDescription>
         </DialogHeader>
@@ -213,17 +221,17 @@ const UsageViewPopup = ({
         {usageLog && (
           <div className="flex-1 overflow-y-auto pr-2">
             {items.length === 0 ? (
-               <div className="text-center py-8 text-gray-400">No hay items en este registro</div>
+              <div className="text-center py-8 text-gray-400">No hay items en este registro</div>
             ) : (
-               renderTable()
+              renderTable()
             )}
           </div>
         )}
 
         <DialogFooter className="mt-4 pt-2 border-t">
           <Button variant="outline" onClick={onClose}>Cerrar</Button>
-          <Button 
-            onClick={downloadAsPDF} 
+          <Button
+            onClick={downloadAsPDF}
             disabled={!usageLog || items.length === 0}
             className="bg-orange-600 hover:bg-orange-700 text-white"
           >

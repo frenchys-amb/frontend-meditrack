@@ -196,7 +196,7 @@ export const useInventory = () => {
 
   // MEDICATIONS ----------------------------------------
 
-  const addMedication = async (name: string, quantity: number, expirationDate: string) => {
+  const addMedication = async (name: string, quantity: number, expirationDate: string | null) => {
     try {
       const normalizedName = normalizeName(name);
 

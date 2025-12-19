@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
+import { DeleteStandardDialog } from '@/components/admin/modals/DeleteStandardDialog';
 
 // Custom Logic & Components
 import { useInventoryStandards, InventoryStandard } from '@/hooks/useInventoryStandards';
@@ -40,6 +41,9 @@ export default function RecommendedPage() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryStandard | null>(null);
 
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<InventoryStandard | null>(null);
+
   // --- HANDLERS (No modificados) ---
   const handleEditClick = (item: InventoryStandard) => {
     setSelectedItem(item);
@@ -55,13 +59,27 @@ export default function RecommendedPage() {
     }
   };
 
-  const handleDeleteWrapper = async (id: string) => {
-    if (!window.confirm('⚠️ ¿Confirmas la eliminación de este estándar?')) return;
+  const handleDeleteClick = (item: InventoryStandard) => {
+    setItemToDelete(item);
+    setIsDeleteOpen(true);
+  };
+
+  const handleConfirmDelete = async (id: string) => {
     try {
       await deleteStandard(id);
-      toast({ title: "Eliminado 🗑️", description: "El estándar ha sido removido." });
+      toast({
+        title: "Eliminado 🗑️",
+        description: "El estándar ha sido removido exitosamente."
+      });
+      // Nota: El refresco automático ocurre si tu hook useInventoryStandards 
+      // ya filtra el estado localmente.
     } catch (error) {
-      toast({ title: "Error", description: "No se pudo eliminar.", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el estándar.",
+        variant: "destructive"
+      });
+      throw error;
     }
   };
 
@@ -139,7 +157,6 @@ export default function RecommendedPage() {
               </div>
 
               <div className="relative w-full md:w-96 group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
                 <Input
                   placeholder="Buscar equipo o estándar..."
                   className="pl-11 pr-4 bg-white border-slate-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 h-11 shadow-md font-medium rounded-xl"
@@ -232,8 +249,8 @@ export default function RecommendedPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-9 w-9 text-slate-500 hover:text-red-600 hover:bg-red-100/70 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
-                              onClick={() => handleDeleteWrapper(item.id)}
+                              className="..."
+                              onClick={() => handleDeleteClick(item)} // Cambiado de handleDeleteWrapper
                               title="Eliminar Estándar"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -257,7 +274,12 @@ export default function RecommendedPage() {
         item={selectedItem}
         onConfirm={handleSaveWrapper}
       />
-
+      <DeleteStandardDialog
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        item={itemToDelete}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 }

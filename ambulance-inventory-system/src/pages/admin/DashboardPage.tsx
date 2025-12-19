@@ -7,7 +7,7 @@ import QRWithDownload from "@/components/qr/QRWithDownload"; // Componente QR de
 import {
   Pill, Package, ClipboardList, FileText,
   Activity, CheckCircle, Clock, RefreshCw,
-  QrCode, Eye,
+  QrCode,
 } from "lucide-react";
 
 
@@ -113,12 +113,6 @@ const RealTimeDashboard = () => {
   // El hook useActivityLog del segundo código trae data con la misma estructura del primero
   const { activities: realActivityLog, isLoading } = useActivityLog({ fetchOnMount: true });
 
-  // Estados modales del primer código (manteniéndolos para la estructura)
-  const [showMedsModal, setShowMedsModal] = useState(false);
-  const [showEquipModal, setShowEquipModal] = useState(false);
-  const [showChecklistModal, setShowChecklistModal] = useState(false);
-  const [showReqModal, setShowReqModal] = useState(false);
-
   // URL de acceso
   const loginUrl = window.location.origin;
 
@@ -171,13 +165,6 @@ const RealTimeDashboard = () => {
                   <div className="border-top pt-2 mt-3">
                     <small className="text-muted">Stock bajo: {medsStats.lowStock}</small>
                   </div>
-                  <button
-                    onClick={() => setShowMedsModal(true)}
-                    className="btn btn-link btn-sm p-0 text-primary text-decoration-none mt-2 d-flex align-items-center gap-1"
-                  >
-                    <Eye size={14} />
-                    Ver detalles
-                  </button>
                 </>
               )}
             </div>
@@ -208,13 +195,6 @@ const RealTimeDashboard = () => {
                   <div className="border-top pt-2 mt-3">
                     <small className="text-muted">Total de Equipos: {equipStats.total}</small>
                   </div>
-                  <button
-                    onClick={() => setShowEquipModal(true)}
-                    className="btn btn-link btn-sm p-0 text-success text-decoration-none mt-2 d-flex align-items-center gap-1"
-                  >
-                    <Eye size={14} />
-                    Ver detalles
-                  </button>
                 </>
               )}
             </div>
@@ -255,13 +235,6 @@ const RealTimeDashboard = () => {
                   <div className="border-top pt-2 mt-3">
                     <small className="text-muted">Cumplimiento hoy: {checklistStats.percent}%</small>
                   </div>
-                  <button
-                    onClick={() => setShowChecklistModal(true)}
-                    className="btn btn-link btn-sm p-0 text-info text-decoration-none mt-2 d-flex align-items-center gap-1"
-                  >
-                    <Eye size={14} />
-                    Ver detalles
-                  </button>
                 </>
               )}
             </div>
@@ -303,13 +276,6 @@ const RealTimeDashboard = () => {
                   <div className="border-top pt-2 mt-3">
                     <small className="text-muted">Aprobado: 100%</small>
                   </div>
-                  <button
-                    onClick={() => setShowReqModal(true)}
-                    className="btn btn-link btn-sm p-0 text-danger text-decoration-none mt-2 d-flex align-items-center gap-1"
-                  >
-                    <Eye size={14} />
-                    Ver historial
-                  </button>
                 </>
               )}
             </div>
@@ -444,28 +410,6 @@ const RealTimeDashboard = () => {
           )}
         </div>
       </div>
-
-      {/* Modals (Mantenidos para la estructura del primer código) */}
-      {showMedsModal && (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          {/* Contenido del modal Medicamentos */}
-        </div>
-      )}
-      {showEquipModal && (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          {/* Contenido del modal Equipos */}
-        </div>
-      )}
-      {showChecklistModal && (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          {/* Contenido del modal Checklists */}
-        </div>
-      )}
-      {showReqModal && (
-        <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-          {/* Contenido del modal Requisiciones */}
-        </div>
-      )}
     </div>
   );
 };

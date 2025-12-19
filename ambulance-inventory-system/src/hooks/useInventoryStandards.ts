@@ -53,10 +53,9 @@ export const useInventoryStandards = () => {
 
   const deleteStandard = async (id: string) => {
     const { error } = await supabase.from('inventory_standards').delete().eq('id', id);
+    if (error) throw error;
 
-    if (error) {
-      throw new Error(error.message);
-    }
+    // REFRESH AUTOMÁTICO:
     setItems(prev => prev.filter(item => item.id !== id));
   };
 

@@ -44,7 +44,7 @@ const Sidebar: React.FC = () => {
         <div className="flex items-center gap-3 min-w-max">
           <div className="shrink-0">
             <img
-              src="/frenchy.png"
+              src="/ems.svg"
               alt="Logo"
               className="h-20 w-10 object-contain"
             />

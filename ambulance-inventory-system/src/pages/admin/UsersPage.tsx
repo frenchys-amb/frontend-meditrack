@@ -15,6 +15,7 @@ import { ROLE_CONFIG } from "@/config/userConfig";
 import { AddUserDialog } from "@/components/admin/modals/AddUserDialog";
 import { EditUserDialog } from "@/components/admin/modals/EditUserDialog";
 import { ChangePasswordDialog } from "@/components/admin/modals/ChangePasswordDialog";
+import { DeleteUserDialog } from "@/components/admin/modals/DeleteUserDialog";
 
 // Componentes de tabla simples (Sin cambios)
 const Table = ({ children, ...props }: any) => (
@@ -49,6 +50,9 @@ const UsersPage = () => {
 
   // Usuario Seleccionado
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   // --- CARGA DE DATOS (NO MODIFICADA) ---
   const loadUsers = async () => {
@@ -110,13 +114,22 @@ const UsersPage = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("⚠️ ¿Eliminar usuario permanentemente?")) return;
     try {
+      // 1. Llamada a la API
       await deleteUser(id);
-      toast({ title: "Eliminado 🗑️", description: "Usuario borrado del sistema.", variant: "destructive" });
-      loadUsers();
+
+      // 2. REFRESH AUTOMÁTICO (Actualización Optimista)
+      // Quitamos al usuario del estado local 'users' inmediatamente
+      setUsers(prevUsers => prevUsers.filter(u => u.id !== id));
+
+      toast({
+        title: "Usuario Eliminado 🗑️",
+        description: "El acceso ha sido revocado correctamente.",
+        variant: "destructive"
+      });
     } catch (error: any) {
-      toast({ title: "Error ❌", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      throw error; // Para que el modal sepa que hubo un error
     }
   };
 
@@ -307,8 +320,11 @@ const UsersPage = () => {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDelete(user.id)}
-                            className="h-9 w-9 hover:bg-red-100 text-slate-500 hover:text-red-600 rounded-lg hover:shadow-md transition-all duration-200 hover:scale-105"
+                            onClick={() => {
+                              setUserToDelete(user);
+                              setIsDeleteOpen(true);
+                            }}
+                            className="h-9 w-9 hover:bg-red-100 text-slate-500 hover:text-red-600 rounded-lg transition-all"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -326,6 +342,12 @@ const UsersPage = () => {
         <AddUserDialog isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} onConfirm={handleCreate} />
         <EditUserDialog isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} user={selectedUser} onConfirm={handleUpdate} />
         <ChangePasswordDialog isOpen={isPassOpen} onClose={() => setIsPassOpen(false)} user={selectedUser} onConfirm={handlePasswordReset} />
+        <DeleteUserDialog
+          isOpen={isDeleteOpen}
+          onClose={() => setIsDeleteOpen(false)}
+          user={userToDelete}
+          onConfirm={handleDelete}
+        />
 
       </main>
     </div>
