@@ -224,7 +224,7 @@ const EquipamentUsagePage = () => {
   const handleAddToUsageList = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentItem) return;
-    if (quantity < 1) return toast({ title: "Error", description: "Cantidad inválida.", variant: "destructive" });
+    if (quantity < 0) return toast({ title: "Error", description: "Cantidad inválida.", variant: "destructive" });
     if (quantity > currentItem.quantity) return toast({ title: "Stock Insuficiente", description: "No puedes gastar más de lo disponible.", variant: "destructive" });
 
     const existingIndex = cart.findIndex(item => item.id === currentItem.id);
@@ -246,7 +246,7 @@ const EquipamentUsagePage = () => {
         originalItemId: category === 'medicamento' ? (currentItem.medication_id || '') : (currentItem.equipment_id || '')
       }]);
     }
-    setQuantity(1);
+    setQuantity(0);
     toast({ title: "Registrado", description: "Item agregado al reporte.", variant: "success" });
   };
 
@@ -358,19 +358,19 @@ const EquipamentUsagePage = () => {
                 <Label>Cant. Usada</Label>
                 <Input
                   type="number"
-                  min={1}
+                  min={0}
                   max={currentItem?.quantity}
                   value={quantity}
                   onChange={(e) => setQuantity(parseInt(e.target.value) || 0)}
                   disabled={!selectedItemId}
-                  placeholder="1"
+                  placeholder="0"
                 />
               </div>
               <div className="flex-1">
                 <Button
                   type="button"
                   onClick={handleAddToUsageList}
-                  disabled={!selectedItemId || quantity < 1}
+                  disabled={!selectedItemId || quantity < 0}
                   variant="dark"
                 >
                   <Minus className="w-5 h-5 mr-2" />
