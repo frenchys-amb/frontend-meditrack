@@ -35,7 +35,7 @@ const SECTION_LABELS: Record<keyof InventoryMaps, string> = {
   miscelaneos: "Misceláneos",
   medicamentos: "Medicamentos",
   entubacion: "Entubación",
-  equipo_general: "Equipo General",
+  equipo: "Equipo",
 };
 
 interface MissingItem {

@@ -16,5 +16,5 @@ export interface InventoryMaps {
 
   medicamentos: InventoryItem[];
   entubacion: InventoryItem[];
-  equipo_general: InventoryItem[];
+  equipo: InventoryItem[];
 }
