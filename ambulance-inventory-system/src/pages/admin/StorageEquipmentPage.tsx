@@ -14,6 +14,8 @@ import { CategoryDetailModal } from '@/components/admin/modals/CategoryDetailMod
 import { EditEquipmentModal } from '@/components/admin/modals/EditEquipmentModal';
 import { DeleteEquipmentDialog } from '@/components/admin/modals/DeleteEquipmentDialog';
 
+import { MoveItemModal } from '@/components/admin/modals/MoveItemModal';
+
 const StorageEquipment = () => {
   const { equipment, isLoading, fetchInventory } = useInventory();
 
@@ -22,6 +24,7 @@ const StorageEquipment = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isMoveOpen, setIsMoveOpen] = useState(false);
 
   // Estados de Selección
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -60,6 +63,12 @@ const StorageEquipment = () => {
     setSelectedItem(item);
     setIsDetailOpen(false);
     setIsDeleteOpen(true);
+  };
+
+  const handleMove = (item: any) => {
+    setSelectedItem(item);
+    setIsDetailOpen(false); // Cerramos el detalle de categoría
+    setIsMoveOpen(true);    // Abrimos el modal de mover
   };
 
   if (isLoading) return (
@@ -151,6 +160,7 @@ const StorageEquipment = () => {
           items={categoryItems}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onMove={handleMove}
         />
 
         <EditEquipmentModal
@@ -171,6 +181,18 @@ const StorageEquipment = () => {
             if (selectedCategory) setIsDetailOpen(true);
           }}
           item={selectedItem}
+        />
+
+        {/* 4. AÑADIR EL NUEVO MODAL AL FINAL */}
+        <MoveItemModal
+          isOpen={isMoveOpen}
+          onClose={() => {
+            setIsMoveOpen(false);
+            fetchInventory(); // Recargar todo el inventario después de mover
+          }}
+          item={selectedItem}
+          // Enviamos la tabla actual. Si estamos en StorageEquipment, asumimos que viene de 'storage_equipment'
+          currentTable="storage_equipment"
         />
 
       </main>

@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Archive, Edit, Trash2 } from 'lucide-react';
+import { Archive, Edit, Trash2, ArrowRightLeft } from 'lucide-react';
 
 interface Equipment {
   id: string;
@@ -23,10 +23,11 @@ interface Props {
   items: Equipment[];
   onEdit: (item: Equipment) => void;
   onDelete: (item: Equipment) => void;
+  onMove: (item: any) => void;
 }
 
-export const CategoryDetailModal: React.FC<Props> = ({ 
-  isOpen, onClose, categoryLabel, categoryIcon, categoryColorClass, items, onEdit, onDelete 
+export const CategoryDetailModal: React.FC<Props> = ({
+  isOpen, onClose, categoryLabel, categoryIcon, categoryColorClass, items, onEdit, onDelete, onMove,
 }) => {
   const [localSearch, setLocalSearch] = useState('');
 
@@ -48,27 +49,27 @@ export const CategoryDetailModal: React.FC<Props> = ({
             </div>
           </div>
           <div className="mt-4 relative">
-             <Input 
-                placeholder="Buscar en esta categoría..." 
-                value={localSearch}
-                onChange={(e) => setLocalSearch(e.target.value)}
-                className="pl-9 bg-white border-slate-200"
-             />
+            <Input
+              placeholder="Buscar en esta categoría..."
+              value={localSearch}
+              onChange={(e) => setLocalSearch(e.target.value)}
+              className="pl-9 bg-white border-slate-200"
+            />
           </div>
         </DialogHeader>
 
         <div className="flex-1 overflow-auto bg-white p-0">
           <Table>
-          <TableHeader 
-                style={{ 
-                    background: 'linear-gradient(135deg, #2d3748 0%, #1a202c 50%, #4a5568 100%)' 
-                }}
+            <TableHeader
+              style={{
+                background: 'linear-gradient(135deg, #2d3748 0%, #1a202c 50%, #4a5568 100%)'
+              }}
             >
               <TableRow>
                 <TableHead className="pl-6 text-white">Equipo</TableHead>
                 <TableHead className="text-white">Stock Almacén</TableHead>
                 <TableHead className="hidden md:table-cell text-white">Ingreso</TableHead>
-                <TableHead className="text-right pr-6 text-white">Acciones</TableHead>
+                <TableHead className="text-white text-xs font-bold uppercase mr-4">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -94,14 +95,19 @@ export const CategoryDetailModal: React.FC<Props> = ({
                       {new Date(item.created_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-right pr-6">
-                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-600 hover:bg-indigo-50" onClick={() => onEdit(item)}>
-                          <Edit className="h-4 w-4" />
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => onEdit(item)}>
+                          <Edit className="h-4 w-4 text-slate-500" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:bg-red-50" onClick={() => onDelete(item)}>
-                          <Trash2 className="h-4 w-4" />
+
+                        <Button variant="ghost" size="icon" onClick={() => onMove(item)}>
+                          <ArrowRightLeft className="h-4 w-4 text-blue-500" />
                         </Button>
-                       </div>
+
+                        <Button variant="ghost" size="icon" onClick={() => onDelete(item)}>
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

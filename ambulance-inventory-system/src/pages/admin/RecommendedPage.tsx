@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Package, Edit, Trash2, Loader2, Target, TrendingUp, Search } from 'lucide-react'; // Añadido Search
+import { Package, Edit, Trash2, Loader2, Target, TrendingUp } from 'lucide-react';
 
 // UI Components
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -12,9 +12,9 @@ import { DeleteStandardDialog } from '@/components/admin/modals/DeleteStandardDi
 import { useInventoryStandards, InventoryStandard } from '@/hooks/useInventoryStandards';
 import { EditStandardDialog } from '@/components/admin/modals/EditStandardDialog';
 
-// Componentes de tabla simples (sin cambios)
+// Componentes de tabla simples
 const Table = ({ children, ...props }: any) => (
-  <table className="w-full" {...props}>{children}</table>
+  <table className="w-full border-collapse" {...props}>{children}</table>
 );
 const TableHeader = ({ children, ...props }: any) => (
   <thead {...props}>{children}</thead>
@@ -26,10 +26,10 @@ const TableRow = ({ children, className = "", ...props }: any) => (
   <tr className={className} {...props}>{children}</tr>
 );
 const TableHead = ({ children, className = "", ...props }: any) => (
-  <th className={`text-left px-4 ${className}`} {...props}>{children}</th>
+  <th className={`text-left px-4 py-4 ${className}`} {...props}>{children}</th>
 );
 const TableCell = ({ children, className = "", ...props }: any) => (
-  <td className={`px-4 ${className}`} {...props}>{children}</td>
+  <td className={`px-4 py-4 ${className}`} {...props}>{children}</td>
 );
 
 export default function RecommendedPage() {
@@ -44,7 +44,7 @@ export default function RecommendedPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<InventoryStandard | null>(null);
 
-  // --- HANDLERS (No modificados) ---
+  // --- HANDLERS ---
   const handleEditClick = (item: InventoryStandard) => {
     setSelectedItem(item);
     setIsEditOpen(true);
@@ -71,8 +71,6 @@ export default function RecommendedPage() {
         title: "Eliminado 🗑️",
         description: "El estándar ha sido removido exitosamente."
       });
-      // Nota: El refresco automático ocurre si tu hook useInventoryStandards 
-      // ya filtra el estado localmente.
     } catch (error) {
       toast({
         title: "Error",
@@ -85,17 +83,16 @@ export default function RecommendedPage() {
 
   // Filtro de búsqueda
   const filteredItems = items.filter(item =>
-    item.normalized_name.toLowerCase().includes(searchTerm.toLowerCase())
+    item.normalized_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.category && item.category.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
-    // Fondo más neutro para que las tarjetas resalten más
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 p-6 lg:p-10">
 
-      {/* --- HEADER MEJORADO --- */}
+      {/* --- HEADER --- */}
       <div className="max-w-6xl mx-auto mb-8">
         <div className="relative">
-          {/* Fondo difuminado más potente */}
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-3xl blur-3xl opacity-60"></div>
 
           <div className="relative bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/70 shadow-2xl shadow-slate-300/60 p-8">
@@ -105,7 +102,6 @@ export default function RecommendedPage() {
                   <Target className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  {/* Título con gradiente más profundo y fuente más audaz */}
                   <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight bg-gradient-to-r from-emerald-600 to-teal-700 bg-clip-text text-transparent">
                     Estándares de Inventario
                   </h1>
@@ -113,7 +109,6 @@ export default function RecommendedPage() {
                     Configuración de metas (Stock Ideal) por ambulancia
                   </p>
                   <div className="flex items-center gap-2 mt-3">
-                    {/* Badge más contrastante */}
                     <div className="flex items-center gap-1.5 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-200">
                       <span className="relative flex h-2 w-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -125,7 +120,6 @@ export default function RecommendedPage() {
                 </div>
               </div>
 
-              {/* Tarjeta de Contador más estilizada */}
               <div className="group bg-gradient-to-br from-emerald-500/10 to-teal-500/10 p-0.5 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300">
                 <div className="bg-white px-6 py-4 rounded-2xl flex items-center gap-4 border border-white">
                   <div className="p-3 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-xl shadow-xl shadow-emerald-500/40">
@@ -158,7 +152,7 @@ export default function RecommendedPage() {
 
               <div className="relative w-full md:w-96 group">
                 <Input
-                  placeholder="Buscar equipo o estándar..."
+                  placeholder="Buscar equipo o categoría..."
                   className="pl-11 pr-4 bg-white border-slate-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 h-11 shadow-md font-medium rounded-xl"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -175,19 +169,21 @@ export default function RecommendedPage() {
                   <Loader2 className="w-14 h-14 animate-spin text-emerald-600 relative z-10" />
                 </div>
                 <p className="font-bold text-slate-600 mt-6 text-lg">Sincronizando datos...</p>
-                <p className="text-slate-400 text-sm mt-1">Obteniendo estándares de inventario</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-900 border-none">
-                    <TableHead className="text-white font-extrabold h-14 pl-8 text-xs uppercase tracking-widest w-[50%]">
+                    <TableHead className="text-white font-extrabold h-14 pl-8 text-xs uppercase tracking-widest w-[40%]">
                       NOMBRE DEL EQUIPO
                     </TableHead>
-                    <TableHead className="text-white font-extrabold h-14 text-center text-xs uppercase tracking-widest w-[25%]">
+                    <TableHead className="text-white font-extrabold h-14 text-center text-xs uppercase tracking-widest w-[20%]">
+                      CATEGORÍA
+                    </TableHead>
+                    <TableHead className="text-white font-extrabold h-14 text-center text-xs uppercase tracking-widest w-[20%]">
                       STOCK IDEAL
                     </TableHead>
-                    <TableHead className="text-white font-extrabold h-14 text-right pr-8 text-xs uppercase tracking-widest w-[25%]">
+                    <TableHead className="text-white font-extrabold h-14 text-right pr-8 text-xs uppercase tracking-widest w-[20%]">
                       ACCIONES
                     </TableHead>
                   </TableRow>
@@ -196,13 +192,12 @@ export default function RecommendedPage() {
                 <TableBody>
                   {filteredItems.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={3} className="h-80 text-center">
+                      <TableCell colSpan={4} className="h-80 text-center">
                         <div className="flex flex-col items-center justify-center py-12">
                           <div className="p-6 bg-slate-50 rounded-2xl mb-4">
                             <Package className="w-16 h-16 text-slate-300" />
                           </div>
                           <p className="text-slate-600 font-bold text-lg">No se encontraron resultados</p>
-                          <p className="text-slate-400 text-sm mt-1">Intenta con otros términos de búsqueda</p>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -210,13 +205,10 @@ export default function RecommendedPage() {
                     filteredItems.map((item, index) => (
                       <TableRow
                         key={item.id}
-                        // Hover más sutil y elegante
                         className="group border-b border-slate-100/70 last:border-0 hover:bg-emerald-50/30 transition-all duration-200 ease-in-out"
-                        style={{ animationDelay: `${index * 30}ms` }}
                       >
-                        <TableCell className="pl-8 py-4">
+                        <TableCell className="pl-8">
                           <div className="flex items-center gap-3">
-                            {/* Ícono de paquete con sombreado interno */}
                             <div className="p-2.5 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl shadow-inner group-hover:shadow-md transition-shadow">
                               <Package className="w-5 h-5 text-emerald-700" />
                             </div>
@@ -226,32 +218,35 @@ export default function RecommendedPage() {
                           </div>
                         </TableCell>
 
-                        <TableCell className="text-center py-4">
-                          <div className="inline-flex items-center justify-center gap-2">
-                            {/* Etiqueta de cantidad con estilo más llamativo */}
+                        <TableCell className="text-center">
+                          <span className="px-3 py-1 rounded-lg bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-black uppercase tracking-tighter shadow-sm">
+                            {item.category || 'N/A'}
+                          </span>
+                        </TableCell>
+
+                        <TableCell className="text-center">
+                          <div className="inline-flex items-center justify-center">
                             <span className="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-extrabold text-base min-w-[5rem] shadow-lg shadow-emerald-500/30 group-hover:shadow-xl transition-shadow">
                               {item.quantity}
                             </span>
                           </div>
                         </TableCell>
 
-                        <TableCell className="text-right pr-8 py-4">
+                        <TableCell className="text-right pr-8">
                           <div className="flex justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-9 w-9 text-slate-500 hover:text-emerald-600 hover:bg-emerald-100/70 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-md"
+                              className="h-9 w-9 text-slate-500 hover:text-emerald-600 hover:bg-emerald-100/70 rounded-lg transition-all duration-200 hover:scale-105"
                               onClick={() => handleEditClick(item)}
-                              title="Editar Cantidad"
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="..."
-                              onClick={() => handleDeleteClick(item)} // Cambiado de handleDeleteWrapper
-                              title="Eliminar Estándar"
+                              className="h-9 w-9 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 hover:scale-105"
+                              onClick={() => handleDeleteClick(item)}
                             >
                               <Trash2 className="w-4 h-4" />
                             </Button>
@@ -267,7 +262,6 @@ export default function RecommendedPage() {
         </Card>
       </div>
 
-      {/* --- MODAL INYECTADO --- */}
       <EditStandardDialog
         isOpen={isEditOpen}
         onClose={() => setIsEditOpen(false)}
